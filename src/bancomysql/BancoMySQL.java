@@ -5,6 +5,8 @@
  */
 package bancomysql;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -20,7 +22,16 @@ public class BancoMySQL extends javax.swing.JFrame {
         modelo.setNumRows(0);
         
         try {
-            
+            connection.resultSet.beforeFirst();
+            while(connection.resultSet.next()) {
+                modelo.addRow(new Object[] {
+                    connection.resultSet.getString("cod")
+                        
+                        //continuar daqui
+                });
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(BancoMySQL.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -31,9 +42,13 @@ public class BancoMySQL extends javax.swing.JFrame {
         initComponents();
         connection = new DatabaseConnection();
         connection.connect();
-        connection.execute();
+        connection.execute("SELECT * FROM " + connection.banco + " ORDER BY cod");
         preencherTabela();
+        posicionarRegistro();
+        jTable.setAutoCreateRowSorter(true);
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.

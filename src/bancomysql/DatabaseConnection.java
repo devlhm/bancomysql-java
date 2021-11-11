@@ -5,7 +5,8 @@ import javax.swing.JOptionPane;
 
 class DatabaseConnection {
     final private String driver = "com.mysql.jdbc.Driver";
-    final private String url = "jdbc:mysql://localhost:3307/clientes";
+    final public String banco = "clientes";
+    final private String url = "jdbc:mysql://localhost:3307/" + banco;
     final private String usuario = "root";
     final private String senha = "usbw";
     
