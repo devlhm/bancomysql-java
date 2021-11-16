@@ -7,6 +7,7 @@ package bancomysql;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -25,13 +26,37 @@ public class BancoMySQL extends javax.swing.JFrame {
             connection.resultSet.beforeFirst();
             while(connection.resultSet.next()) {
                 modelo.addRow(new Object[] {
-                    connection.resultSet.getString("cod")
-                        
-                        //continuar daqui
+                    connection.resultSet.getString("cod"),
+                    connection.resultSet.getString("nome"),
+                    connection.resultSet.getString("dt_nasc"),
+                    connection.resultSet.getString("telefone"),
+                    connection.resultSet.getString("email")
                 });
             }
         } catch (SQLException ex) {
-            Logger.getLogger(BancoMySQL.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null,"Erro ao listar dados da tabela!!: "
+                    +ex,"Erro!",JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void posicionarRegistro() {
+        try {
+            connection.resultSet.first();
+            mostrarDados();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível posicionar no primeiro registro: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public void mostrarDados() {
+        try {
+            codigoField.setText(connection.resultSet.getString("cod"));
+            nomeField.setText(connection.resultSet.getString("nome"));
+            dataField.setText(connection.resultSet.getString("dt_nasc"));
+            telefoneField.setText(connection.resultSet.getString("telefone"));
+            emailField.setText(connection.resultSet.getString("email"));
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não localizou dados: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -42,7 +67,7 @@ public class BancoMySQL extends javax.swing.JFrame {
         initComponents();
         connection = new DatabaseConnection();
         connection.connect();
-        connection.execute("SELECT * FROM " + connection.banco + " ORDER BY cod");
+        connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
         preencherTabela();
         posicionarRegistro();
         jTable.setAutoCreateRowSorter(true);
@@ -71,6 +96,14 @@ public class BancoMySQL extends javax.swing.JFrame {
         nomeField = new javax.swing.JTextField();
         telefoneField = new javax.swing.JTextField();
         emailField = new javax.swing.JTextField();
+        firstButton = new javax.swing.JButton();
+        previousButton = new javax.swing.JButton();
+        nextButton = new javax.swing.JButton();
+        lastButton = new javax.swing.JButton();
+        addButton = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        saveButton = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Cadastro de Clientes");
@@ -111,7 +144,75 @@ public class BancoMySQL extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        jTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableMouseClicked(evt);
+            }
+        });
+        jTable.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jTableKeyPressed(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTable);
+
+        firstButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/resultset_first.png"))); // NOI18N
+        firstButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                firstButtonActionPerformed(evt);
+            }
+        });
+
+        previousButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/resultset_previous.png"))); // NOI18N
+        previousButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                previousButtonActionPerformed(evt);
+            }
+        });
+
+        nextButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/resultset_next.png"))); // NOI18N
+        nextButton.setToolTipText("");
+        nextButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextButtonActionPerformed(evt);
+            }
+        });
+
+        lastButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/resultset_last.png"))); // NOI18N
+        lastButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lastButtonActionPerformed(evt);
+            }
+        });
+
+        addButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/add.png"))); // NOI18N
+        addButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addButtonActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/application_delete.png"))); // NOI18N
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
+        saveButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/disk.png"))); // NOI18N
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed(evt);
+            }
+        });
+
+        btnEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/application_edit.png"))); // NOI18N
+        btnEdit.setToolTipText("");
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -127,18 +228,34 @@ public class BancoMySQL extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(dataLabel)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(codigoLabel)
-                                    .addComponent(nomeLabel)
-                                    .addComponent(telLabel)
-                                    .addComponent(emailLabel))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(codigoLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(nomeLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(telLabel, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(emailLabel, javax.swing.GroupLayout.Alignment.LEADING))
                                 .addGap(84, 84, 84)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(codigoField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(emailField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(telefoneField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(dataField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(nomeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                    .addComponent(nomeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(firstButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(previousButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(nextButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lastButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(86, 86, 86)
+                                .addComponent(addButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(saveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addGap(30, 30, 30))
         );
 
@@ -147,7 +264,7 @@ public class BancoMySQL extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(47, 47, 47)
+                .addGap(34, 34, 34)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(codigoLabel)
                     .addComponent(codigoField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -167,7 +284,19 @@ public class BancoMySQL extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(emailLabel)
                     .addComponent(emailField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(firstButton)
+                        .addComponent(previousButton)
+                        .addComponent(nextButton)
+                        .addComponent(lastButton))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(addButton)
+                        .addComponent(saveButton)
+                        .addComponent(btnEdit)
+                        .addComponent(btnDelete)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -175,6 +304,149 @@ public class BancoMySQL extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableMouseClicked
+        fillFields();
+    }//GEN-LAST:event_jTableMouseClicked
+
+    private void jTableKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTableKeyPressed
+        fillFields();
+    }//GEN-LAST:event_jTableKeyPressed
+
+    private void firstButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstButtonActionPerformed
+        try {
+            connection.resultSet.first();
+            mostrarDados();
+        } catch (SQLException ex) {
+            handleRegisterNotPositioned(ex);
+        }
+    }//GEN-LAST:event_firstButtonActionPerformed
+
+    private void handleRegisterNotPositioned(SQLException ex) {
+        JOptionPane.showMessageDialog(null, "Não foi possível posicionar o último registro: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void previousButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousButtonActionPerformed
+        try {
+            connection.resultSet.previous();
+            mostrarDados();
+        } catch (SQLException ex) {
+            handleRegisterNotPositioned(ex);
+        }
+    }//GEN-LAST:event_previousButtonActionPerformed
+
+    private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
+        try {
+            connection.resultSet.next();
+            mostrarDados();
+        } catch (SQLException ex) {
+            handleRegisterNotPositioned(ex);
+        }
+    }//GEN-LAST:event_nextButtonActionPerformed
+
+    private void lastButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lastButtonActionPerformed
+        try {
+            connection.resultSet.last();
+            mostrarDados();
+        } catch (SQLException ex) {
+            handleRegisterNotPositioned(ex);
+        }
+    }//GEN-LAST:event_lastButtonActionPerformed
+
+    private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
+        codigoField.setText("");
+        nomeField.setText("");
+        dataField.setText("");
+        telefoneField.setText("");
+        emailField.setText("");
+        
+        codigoField.requestFocus();
+    }//GEN-LAST:event_addButtonActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        String nome = nomeField.getText();
+        String dataNasc = dataField.getText();
+        String telefone = telefoneField.getText();
+        String email = emailField.getText();
+        
+        try {
+            String sql = "INSERT INTO " + connection.tabela +
+                    " (nome, telefone, email, dt_nasc) VALUES ("
+                    + "'" +nome + "', '"
+                    + telefone + "', '"
+                    + email + "', '"
+                    + dataNasc +
+                    "')";
+            
+            connection.executeUpdate(sql);
+            JOptionPane.showMessageDialog(null, "Gravação realizada com sucesso!", "Sucesso!", JOptionPane.INFORMATION_MESSAGE);
+            connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
+            connection.resultSet.first();
+            preencherTabela();
+            mostrarDados();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao selecionar o primeiro registro: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
+        }
+        
+    }//GEN-LAST:event_saveButtonActionPerformed
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        try {
+        
+            String nome = nomeField.getText();
+            String dataNasc = dataField.getText();
+            String telefone = telefoneField.getText();
+            String email = emailField.getText();
+            String sql = "";
+            String msg = "";
+
+            if(codigoField.getText().equals("")) {
+                sql = "INSERT INTO " + connection.tabela +
+                        " (nome, telefone, email, dt_nasc) VALUES ( +"
+                        + "'" +nome + "', '"
+                        + telefone + "', '"
+                        + email + "', '"
+                        + dataNasc +
+                        "')";
+                msg = "Gravação de um novo registro";
+            } else {
+                sql = "UPDATE " + connection.tabela +
+                        " SET "
+                        + "nome='" + nome +
+                        "', telefone='" + telefone +
+                        "', email='" + email + 
+                        "', dt_nasc='" + dataNasc +
+                        "')";
+                msg = "Alteração de um registro";
+            }
+
+            connection.executeUpdate(sql);
+            JOptionPane.showMessageDialog(null, msg + " realizada com sucesso!", "Sucesso!", JOptionPane.INFORMATION_MESSAGE);
+
+            connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
+
+            connection.resultSet.first(); 
+
+            preencherTabela();
+            mostrarDados();
+        } catch(SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Erro na gravação: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnEditActionPerformed
+
+    private void fillFields() {
+        int linhaSelecionada = jTable.getSelectedRow();
+        codigoField.setText(jTable.getValueAt(linhaSelecionada, 0).toString());
+        nomeField.setText(jTable.getValueAt(linhaSelecionada, 1).toString());
+        dataField.setText(jTable.getValueAt(linhaSelecionada, 2).toString());
+        telefoneField.setText(jTable.getValueAt(linhaSelecionada, 3).toString());
+        emailField.setText(jTable.getValueAt(linhaSelecionada, 4).toString());
+        
+        
+    }
     /**
      * @param args the command line arguments
      */
@@ -211,16 +483,24 @@ public class BancoMySQL extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addButton;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnEdit;
     private javax.swing.JTextField codigoField;
     private javax.swing.JLabel codigoLabel;
     private javax.swing.JTextField dataField;
     private javax.swing.JLabel dataLabel;
     private javax.swing.JTextField emailField;
     private javax.swing.JLabel emailLabel;
+    private javax.swing.JButton firstButton;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable;
+    private javax.swing.JButton lastButton;
+    private javax.swing.JButton nextButton;
     private javax.swing.JTextField nomeField;
     private javax.swing.JLabel nomeLabel;
+    private javax.swing.JButton previousButton;
+    private javax.swing.JButton saveButton;
     private javax.swing.JLabel telLabel;
     private javax.swing.JTextField telefoneField;
     // End of variables declaration//GEN-END:variables

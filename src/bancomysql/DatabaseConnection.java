@@ -1,6 +1,8 @@
 package bancomysql;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 class DatabaseConnection {
@@ -9,6 +11,7 @@ class DatabaseConnection {
     final private String url = "jdbc:mysql://localhost:3307/" + banco;
     final private String usuario = "root";
     final private String senha = "usbw";
+    final public String tabela = "tbclientes";
     
     private Connection connection;
     public Statement statement;
@@ -40,6 +43,15 @@ class DatabaseConnection {
             resultSet = statement.executeQuery(sql);
         } catch (SQLException ex) {
             handleSQLException(ex);
+        }
+        
+    }
+    
+    public void executeUpdate(String sql) {
+        try {
+            statement.executeUpdate(sql);
+        } catch(SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Erro na gravação: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
         }
         
     }
