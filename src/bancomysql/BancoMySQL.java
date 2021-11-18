@@ -67,7 +67,7 @@ public class BancoMySQL extends javax.swing.JFrame {
         initComponents();
         connection = new DatabaseConnection();
         connection.connect();
-        connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
+        connection.execute("SELECT * FROM tbclientes ORDER BY cod");
         preencherTabela();
         posicionarRegistro();
         jTable.setAutoCreateRowSorter(true);
@@ -363,7 +363,27 @@ public class BancoMySQL extends javax.swing.JFrame {
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
+        String sql = "";
+        try {
+            int resposta = JOptionPane.showConfirmDialog(rootPane, "Deseja excluir o registro?",
+                    "Confirmar Exclusão", JOptionPane.YES_NO_OPTION, 3);
+            
+            if (resposta == 0) {
+                sql = "DELETE FROM " + connection.tabela + " WHERE cod = " + codigoField.getText();
+                int excluir = connection.statement.executeUpdate(sql);
+                if(excluir == 1) {
+                    JOptionPane.showMessageDialog(null, "Exclusão realizada com sucesso!", "Mensagem", JOptionPane.INFORMATION_MESSAGE);
+                    connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
+                    connection.resultSet.first();
+                    preencherTabela();
+                    posicionarRegistro();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Operação cancelada pelo usuário!", "Mensagem", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Erro na exclusão: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
@@ -394,15 +414,15 @@ public class BancoMySQL extends javax.swing.JFrame {
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
-        try {
-        
-            String nome = nomeField.getText();
-            String dataNasc = dataField.getText();
-            String telefone = telefoneField.getText();
-            String email = emailField.getText();
-            String sql = "";
-            String msg = "";
 
+        String nome = nomeField.getText();
+        String dataNasc = dataField.getText();
+        String telefone = telefoneField.getText();
+        String email = emailField.getText();
+        String sql = "";
+        String msg = "";
+            
+        try {
             if(codigoField.getText().equals("")) {
                 sql = "INSERT INTO " + connection.tabela +
                         " (nome, telefone, email, dt_nasc) VALUES ( +"
