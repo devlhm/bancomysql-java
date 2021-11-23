@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package bancomysql;
+
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,17 +16,17 @@ import javax.swing.table.DefaultTableModel;
  * @author Aluno
  */
 public class BancoMySQL extends javax.swing.JFrame {
-    
+
     DatabaseConnection connection;
 
     private void preencherTabela() {
         DefaultTableModel modelo = (DefaultTableModel) jTable.getModel();
         modelo.setNumRows(0);
-        
+
         try {
             connection.resultSet.beforeFirst();
-            while(connection.resultSet.next()) {
-                modelo.addRow(new Object[] {
+            while (connection.resultSet.next()) {
+                modelo.addRow(new Object[]{
                     connection.resultSet.getString("cod"),
                     connection.resultSet.getString("nome"),
                     connection.resultSet.getString("dt_nasc"),
@@ -34,11 +35,11 @@ public class BancoMySQL extends javax.swing.JFrame {
                 });
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null,"Erro ao listar dados da tabela!!: "
-                    +ex,"Erro!",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Erro ao listar dados da tabela!!: "
+                    + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void posicionarRegistro() {
         try {
             connection.resultSet.first();
@@ -47,7 +48,7 @@ public class BancoMySQL extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Não foi possível posicionar no primeiro registro: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     public void mostrarDados() {
         try {
             codigoField.setText(connection.resultSet.getString("cod"));
@@ -72,8 +73,6 @@ public class BancoMySQL extends javax.swing.JFrame {
         posicionarRegistro();
         jTable.setAutoCreateRowSorter(true);
     }
-    
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -104,6 +103,8 @@ public class BancoMySQL extends javax.swing.JFrame {
         btnDelete = new javax.swing.JButton();
         saveButton = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
+        labelPesquisa = new javax.swing.JLabel();
+        pesquisaField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Cadastro de Clientes");
@@ -155,6 +156,8 @@ public class BancoMySQL extends javax.swing.JFrame {
             }
         });
         jScrollPane1.setViewportView(jTable);
+
+        codigoField.setEditable(false);
 
         firstButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/resultset_first.png"))); // NOI18N
         firstButton.addActionListener(new java.awt.event.ActionListener() {
@@ -214,15 +217,20 @@ public class BancoMySQL extends javax.swing.JFrame {
             }
         });
 
+        labelPesquisa.setText("Pesquisa por nome de Cliente:");
+
+        pesquisaField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                pesquisaFieldKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(40, 40, 40)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -255,8 +263,17 @@ public class BancoMySQL extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addGap(30, 30, 30))
+                                .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 599, Short.MAX_VALUE)))
+                .addGap(16, 16, 16))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(141, 141, 141)
+                .addComponent(labelPesquisa)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pesquisaField, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {codigoField, dataField, emailField, nomeField, telefoneField});
@@ -284,7 +301,7 @@ public class BancoMySQL extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(emailLabel)
                     .addComponent(emailField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(firstButton)
@@ -298,6 +315,10 @@ public class BancoMySQL extends javax.swing.JFrame {
                         .addComponent(btnDelete)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labelPesquisa)
+                    .addComponent(pesquisaField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -324,11 +345,12 @@ public class BancoMySQL extends javax.swing.JFrame {
     private void handleRegisterNotPositioned(SQLException ex) {
         JOptionPane.showMessageDialog(null, "Não foi possível posicionar o último registro: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
     }
-    
+
     private void previousButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousButtonActionPerformed
         try {
-            connection.resultSet.previous();
-            mostrarDados();
+            if(connection.resultSet.previous()) {
+                mostrarDados();
+            }
         } catch (SQLException ex) {
             handleRegisterNotPositioned(ex);
         }
@@ -336,8 +358,10 @@ public class BancoMySQL extends javax.swing.JFrame {
 
     private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
         try {
-            connection.resultSet.next();
-            mostrarDados();
+            if (connection.resultSet.next()) {
+                mostrarDados();    
+            }
+            
         } catch (SQLException ex) {
             handleRegisterNotPositioned(ex);
         }
@@ -358,7 +382,7 @@ public class BancoMySQL extends javax.swing.JFrame {
         dataField.setText("");
         telefoneField.setText("");
         emailField.setText("");
-        
+
         codigoField.requestFocus();
     }//GEN-LAST:event_addButtonActionPerformed
 
@@ -367,11 +391,11 @@ public class BancoMySQL extends javax.swing.JFrame {
         try {
             int resposta = JOptionPane.showConfirmDialog(rootPane, "Deseja excluir o registro?",
                     "Confirmar Exclusão", JOptionPane.YES_NO_OPTION, 3);
-            
+
             if (resposta == 0) {
                 sql = "DELETE FROM " + connection.tabela + " WHERE cod = " + codigoField.getText();
                 int excluir = connection.statement.executeUpdate(sql);
-                if(excluir == 1) {
+                if (excluir == 1) {
                     JOptionPane.showMessageDialog(null, "Exclusão realizada com sucesso!", "Mensagem", JOptionPane.INFORMATION_MESSAGE);
                     connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
                     connection.resultSet.first();
@@ -391,16 +415,16 @@ public class BancoMySQL extends javax.swing.JFrame {
         String dataNasc = dataField.getText();
         String telefone = telefoneField.getText();
         String email = emailField.getText();
-        
+
         try {
-            String sql = "INSERT INTO " + connection.tabela +
-                    " (nome, telefone, email, dt_nasc) VALUES ("
-                    + "'" +nome + "', '"
+            String sql = "INSERT INTO " + connection.tabela
+                    + " (nome, telefone, email, dt_nasc) VALUES ("
+                    + "'" + nome + "', '"
                     + telefone + "', '"
                     + email + "', '"
-                    + dataNasc +
-                    "')";
-            
+                    + dataNasc
+                    + "')";
+
             connection.executeUpdate(sql);
             JOptionPane.showMessageDialog(null, "Gravação realizada com sucesso!", "Sucesso!", JOptionPane.INFORMATION_MESSAGE);
             connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
@@ -410,7 +434,7 @@ public class BancoMySQL extends javax.swing.JFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Erro ao selecionar o primeiro registro: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
         }
-        
+
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
@@ -421,25 +445,25 @@ public class BancoMySQL extends javax.swing.JFrame {
         String email = emailField.getText();
         String sql = "";
         String msg = "";
-            
+
         try {
-            if(codigoField.getText().equals("")) {
-                sql = "INSERT INTO " + connection.tabela +
-                        " (nome, telefone, email, dt_nasc) VALUES ( +"
-                        + "'" +nome + "', '"
+            if (codigoField.getText().equals("")) {
+                sql = "INSERT INTO " + connection.tabela
+                        + " (nome, telefone, email, dt_nasc) VALUES ( +"
+                        + "'" + nome + "', '"
                         + telefone + "', '"
                         + email + "', '"
-                        + dataNasc +
-                        "')";
+                        + dataNasc
+                        + "')";
                 msg = "Gravação de um novo registro";
             } else {
-                sql = "UPDATE " + connection.tabela +
-                        " SET "
-                        + "nome='" + nome +
-                        "', telefone='" + telefone +
-                        "', email='" + email + 
-                        "', dt_nasc='" + dataNasc +
-                        "')";
+                sql = "UPDATE " + connection.tabela
+                        + " SET "
+                        + "nome='" + nome
+                        + "', telefone='" + telefone
+                        + "', email='" + email
+                        + "', dt_nasc='" + dataNasc
+                        + "')";
                 msg = "Alteração de um registro";
             }
 
@@ -448,14 +472,27 @@ public class BancoMySQL extends javax.swing.JFrame {
 
             connection.execute("SELECT * FROM " + connection.tabela + " ORDER BY cod");
 
-            connection.resultSet.first(); 
+            connection.resultSet.first();
 
             preencherTabela();
             mostrarDados();
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Erro na gravação: " + ex, "Erro!", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnEditActionPerformed
+
+    private void pesquisaFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pesquisaFieldKeyReleased
+        try {
+            String sql = "SELECT * FROM " + connection.tabela + " WHERE nome LIKE '" + pesquisaField.getText() + "%'";
+            connection.execute(sql);
+
+            if(connection.resultSet.first()) {
+                preencherTabela();
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Os dados digitados não foram localizados:\n" + ex, "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_pesquisaFieldKeyReleased
 
     private void fillFields() {
         int linhaSelecionada = jTable.getSelectedRow();
@@ -464,9 +501,8 @@ public class BancoMySQL extends javax.swing.JFrame {
         dataField.setText(jTable.getValueAt(linhaSelecionada, 2).toString());
         telefoneField.setText(jTable.getValueAt(linhaSelecionada, 3).toString());
         emailField.setText(jTable.getValueAt(linhaSelecionada, 4).toString());
-        
-        
     }
+
     /**
      * @param args the command line arguments
      */
@@ -515,10 +551,12 @@ public class BancoMySQL extends javax.swing.JFrame {
     private javax.swing.JButton firstButton;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable;
+    private javax.swing.JLabel labelPesquisa;
     private javax.swing.JButton lastButton;
     private javax.swing.JButton nextButton;
     private javax.swing.JTextField nomeField;
     private javax.swing.JLabel nomeLabel;
+    private javax.swing.JTextField pesquisaField;
     private javax.swing.JButton previousButton;
     private javax.swing.JButton saveButton;
     private javax.swing.JLabel telLabel;
